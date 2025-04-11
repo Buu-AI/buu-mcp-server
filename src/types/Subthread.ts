@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { PaginationSchema } from "./shared";
+import { z } from 'zod';
+import { PaginationSchema } from './shared';
 
 export const SubthreadFilterSchema = z.object({
   _id_eq: z.string().optional(),
@@ -29,18 +29,18 @@ export const SubthreadFilterSchema = z.object({
 });
 
 export const SubthreadGenerateParamsSchema = z.object({
-  style: z.any().optional().describe("Optional style input for subthread generation"),
-  prompt: z.string().optional().describe("Optional prompt text"),
-  imageUrl: z.string().optional().describe("Optional URL of the image"),
-  strength: z.number().optional().describe("Optional strength value for image influence"),
-  threadId: z.string().optional().describe("Optional thread ID"),
+  style: z.any().optional().describe('Optional style input for subthread generation'),
+  prompt: z.string().optional().describe('Optional prompt text'),
+  imageUrl: z.string().optional().describe('Optional URL of the image'),
+  strength: z.number().optional().describe('Optional strength value for image influence'),
+  threadId: z.string().optional().describe('Optional thread ID'),
 });
 
 export const SubthreadGetParamsSchema = z.object({
-  subthreadId: z.string().describe("ID of the subthread to fetch"),
+  subthreadId: z.string().describe('ID of the subthread to fetch'),
 });
 
 export const SubthreadGetAllParamsSchema = z.object({
-  pagination: PaginationSchema.describe("Pagination input for subthread query"),
-  filters: SubthreadFilterSchema.describe("Filter options for subthread query"),
+  pagination: PaginationSchema.describe('Pagination input for subthread query'),
+  filters: SubthreadFilterSchema.describe('Filter options for subthread query'),
 });

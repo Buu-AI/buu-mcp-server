@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "npx fastmcp inspect src/index.ts",
     "build": "tsc",
-    "inspect": "npx fastmcp inspect dist/index.js"
+    "inspect": "npx fastmcp inspect dist/index.js",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" || true"
   },
   "repository": {
     "type": "git",
@@ -16,12 +17,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "buu-server-sdk": "^0.1.5",
+    "buu-server-sdk": "^0.2.1",
     "fastmcp": "^1.21.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "prettier": "^3.5.3",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
   }

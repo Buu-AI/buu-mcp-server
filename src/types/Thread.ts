@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { PaginationSchema } from "./shared";
+import { z } from 'zod';
+import { PaginationSchema } from './shared';
 
 // ThreadFilter schema
 export const ThreadFilterSchema = z.object({
@@ -30,6 +30,6 @@ export const ThreadFilterSchema = z.object({
 
 // threads_get_all parameters
 export const ThreadsGetAllParamsSchema = z.object({
-  pagination: PaginationSchema.optional().describe("Pagination settings for querying threads"),
-  filters: ThreadFilterSchema.optional().describe("Filter criteria to narrow down thread results"),
+  pagination: PaginationSchema.optional().describe('Pagination settings for querying threads'),
+  filters: ThreadFilterSchema.optional().describe('Filter criteria to narrow down thread results'),
 });

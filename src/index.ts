@@ -1,20 +1,20 @@
-import { FastMCP } from "fastmcp";
-import { registerTeamTools } from "./tools/TeamTools";
-import { registerThreadTools } from "./tools/ThreadTools";
-import { registerSubthreadTools } from "./tools/SubthreadTools";
-import { registerGenRequestTools } from "./tools/GenRequestTools";
-import { BuuFunServerClient } from "buu-server-sdk";
+import { FastMCP } from 'fastmcp';
+import { BuuFunServerClient } from 'buu-server-sdk';
+import { registerTeamTools } from './tools/TeamTools';
+import { registerThreadTools } from './tools/ThreadTools';
+import { registerSubthreadTools } from './tools/SubthreadTools';
+import { registerGenRequestTools } from './tools/GenRequestTools';
 
 const server = new FastMCP({
-  name: "buu-mcp-server",
-  version: "0.0.1",
+  name: 'buu-mcp-server',
+  version: '0.0.1',
 });
 
 const client = new BuuFunServerClient({
-  endpoint: "http://localhost:4002/graphql",
+  endpoint: process.env['BUU_SERVER_URL']!,
   authorization: {
-    apiKey: process.env['TEAM_API_KEY']!
-  }
+    apiKey: process.env['TEAM_API_KEY']!,
+  },
 });
 
 registerTeamTools(server, client);
@@ -25,12 +25,11 @@ registerGenRequestTools(server, client);
 // Start the MCP server
 async function main() {
   try {
-    await server.start({ transportType: "stdio" });
+    await server.start({ transportType: 'stdio' });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 }
 
 main();
-
