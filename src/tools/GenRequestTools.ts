@@ -6,13 +6,14 @@ import {
   GenRequestGetAllParamsSchema,
 } from '../types/GenRequest';
 
-export const registerGenRequestTools = (server: FastMCP, client: BuuFunServerClient) => {
+export const registerGenRequestTools = (server: FastMCP, createClient: () => BuuFunServerClient) => {
+  const client = createClient();
+
   server.addTool({
     name: 'generate_image',
     description: '[PRIVATE] - Generate image',
     parameters: GenerateImageParamsSchema,
-    execute: async ({ subthreadId }, { log }) => {
-      log.debug(JSON.stringify(client));
+    execute: async ({ subthreadId }) => {
       const response = await client.genRequest.generateImage({ subthreadId });
 
       return JSON.stringify(response);

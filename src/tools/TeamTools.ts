@@ -10,7 +10,9 @@ import {
   TeamUpdateParamsSchema,
 } from '../types/Team';
 
-export const registerTeamTools = (server: FastMCP, client: BuuFunServerClient) => {
+export const registerTeamTools = (server: FastMCP, createClient: () => BuuFunServerClient) => {
+  const client = createClient();
+
   server.addTool({
     name: 'team_create',
     description: '[PRIVATE] Create a new team for the logged-in user.',

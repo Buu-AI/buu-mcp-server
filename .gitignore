@@ -136,4 +136,4 @@ dist
 .pnp.*
 
 # Other
-.DS-Store
+.DS_Store

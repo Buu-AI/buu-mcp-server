@@ -6,7 +6,9 @@ import {
   SubthreadGetParamsSchema,
 } from '../types/Subthread';
 
-export const registerSubthreadTools = (server: FastMCP, client: BuuFunServerClient) => {
+export const registerSubthreadTools = (server: FastMCP, createClient: () => BuuFunServerClient) => {
+  const client = createClient();
+
   server.addTool({
     name: 'subthread_generate',
     description: '[PRIVATE] Generates a new subthread.',

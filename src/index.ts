@@ -10,17 +10,18 @@ const server = new FastMCP({
   version: '0.0.1',
 });
 
-const client = new BuuFunServerClient({
-  endpoint: process.env['BUU_SERVER_URL']!,
-  authorization: {
-    apiKey: process.env['TEAM_API_KEY']!,
-  },
-});
+const createClient = (session?: any) =>
+  new BuuFunServerClient({
+    endpoint: process.env['BUU_SERVER_URL']!,
+    authorization: session?.authorization || {
+      apiKey: process.env['TEAM_API_KEY']!,
+    },
+  });
 
-registerTeamTools(server, client);
-registerThreadTools(server, client);
-registerSubthreadTools(server, client);
-registerGenRequestTools(server, client);
+registerTeamTools(server, createClient);
+registerThreadTools(server, createClient);
+registerSubthreadTools(server, createClient);
+registerGenRequestTools(server, createClient);
 
 // Start the MCP server
 async function main() {
