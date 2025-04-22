@@ -1,0 +1,16 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - buuTeamApiKey
+    properties:
+      buuTeamApiKey:
+        type: string
+        description: Your Buu Team API key
+  commandFunction: |
+    (config) => ({
+      command: 'node',
+      args: ['dist/index.js'],
+      env: { BUU_TEAM_API_KEY: config.buuTeamApiKey }
+    }) 

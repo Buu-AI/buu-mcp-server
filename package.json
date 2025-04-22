@@ -1,24 +1,33 @@
 {
   "name": "buu-mcp-server",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "npx fastmcp inspect src/index.ts",
-    "build": "tsc",
-    "inspect": "npx fastmcp inspect dist/index.js",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" || true"
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "buu-mcp-server": "dist/index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Buu-Fun/buu-mcp-server.git"
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" || true",
+    "prepare": "npm run build",
+    "release": "npm run build && npm publish"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "buu-server-sdk": "^0.2.1",
-    "fastmcp": "^1.21.0",
+    "@modelcontextprotocol/sdk": "^1.10.1",
+    "dotenv": "^16.5.0",
+    "graphql-request": "^7.1.2",
+    "ts-node": "^10.9.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -26,5 +35,12 @@
     "prettier": "^3.5.3",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Buu-AI/buu-mcp-server"
   }
 }

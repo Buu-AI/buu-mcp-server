@@ -1,50 +1,183 @@
-import { FastMCP } from 'fastmcp';
-import { BuuFunServerClient } from 'buu-server-sdk';
-import {
-  SubthreadGenerateParamsSchema,
-  SubthreadGetAllParamsSchema,
-  SubthreadGetParamsSchema,
-} from '../types/Subthread';
+import { z } from 'zod';
+import { gql, GraphQLClient } from 'graphql-request';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { processStreamingResponse } from '../utils/shared.js';
 
-export const registerSubthreadTools = (server: FastMCP, createClient: () => BuuFunServerClient) => {
-  const client = createClient();
+const BUU_SERVER_URL = new GraphQLClient(
+  process.env.BUU_SERVER_URL || 'https://apollo-gateway-sandbox.up.railway.app/graphql'
+);
 
-  server.addTool({
-    name: 'subthread_generate',
-    description: '[PRIVATE] Generates a new subthread.',
-    parameters: SubthreadGenerateParamsSchema,
-    execute: async ({ style, prompt, imageUrl, strength, threadId }) => {
-      const response = await client.subthread.generate({
-        style,
-        prompt,
-        imageUrl,
-        strength,
-        threadId,
-      });
+const generateSubthreadMutation = gql`
+  mutation GenerateSubthread(
+    $style: JSON
+    $prompt: String
+    $imageUrl: String
+    $strength: Float
+    $threadId: String
+  ) {
+    generateSubthread(
+      style: $style
+      prompt: $prompt
+      imageUrl: $imageUrl
+      strength: $strength
+      threadId: $threadId
+    ) {
+      ... on Subthread {
+        _id
+        createdAt
+        updatedAt
+        teamId
+        threadId
+        prompt
+        style
+        imageUrl
+        strength
+        address
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
 
-      return JSON.stringify(response);
+const getSubthreadQuery = gql`
+  query Subthread($subthreadId: String!) {
+    getSubthread(subthreadId: $subthreadId) {
+      ... on Subthread {
+        _id
+        createdAt
+        updatedAt
+        teamId
+        threadId
+        prompt
+        style
+        imageUrl
+        strength
+        address
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
+
+const getSubthreadsQuery = gql`
+  query GetSubthreads($pagination: Pagination, $filters: SubthreadFilter) {
+    getSubthreads(pagination: $pagination, filters: $filters) {
+      ... on SubthreadsPage {
+        items {
+          _id
+          createdAt
+          updatedAt
+          teamId
+          threadId
+          prompt
+          style
+          imageUrl
+          strength
+          address
+        }
+        metadata {
+          limit
+          offset
+          orderBy
+          orderDirection
+          numElements
+          total
+          page
+          pages
+        }
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
+
+export const registerSubthreadTools = (server: McpServer) => {
+  server.tool(
+    'subthread_generate',
+    '[PRIVATE] Generates a new subthread.',
+    {
+      style: z.any().optional().describe('Optional style input for subthread generation'),
+      prompt: z.string().optional().describe('Optional prompt text'),
+      imageUrl: z.string().optional().describe('Optional URL of the image'),
+      strength: z.number().optional().describe('Optional strength value for image influence'),
+      threadId: z.string().optional().describe('Optional thread ID'),
     },
-  });
+    async ({ style, prompt, imageUrl, strength, threadId }) => {
+      try {
+        const response = await BUU_SERVER_URL.request(generateSubthreadMutation, {
+          style,
+          prompt,
+          imageUrl,
+          strength,
+          threadId,
+        });
+        const result = await processStreamingResponse(response);
+        return {
+          content: [{ type: 'text', text: result }],
+        };
+      } catch (error) {
+        console.error('Error calling subthread_generate:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to generate subthread. ${error}` }],
+        };
+      }
+    }
+  );
 
-  server.addTool({
-    name: 'subthread_get',
-    description: "[PRIVATE] Get team's subthread by ID.",
-    parameters: SubthreadGetParamsSchema,
-    execute: async (args) => {
-      const response = await client.subthread.get({ subthreadId: args.subthreadId });
-
-      return JSON.stringify(response);
+  server.tool(
+    'subthread_get',
+    "[PRIVATE] Get team's subthread by ID.",
+    {
+      subthreadId: z.string().describe('ID of the subthread to fetch'),
     },
-  });
+    async ({ subthreadId }) => {
+      try {
+        const response = await BUU_SERVER_URL.request(getSubthreadQuery, { subthreadId });
+        const result = await processStreamingResponse(response);
+        return {
+          content: [{ type: 'text', text: result }],
+        };
+      } catch (error) {
+        console.error('Error calling subthread_get:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to retrieve subthread. ${error}` }],
+        };
+      }
+    }
+  );
 
-  server.addTool({
-    name: 'subthread_get_all',
-    description: "[PRIVATE] Get all team's subthreads.",
-    parameters: SubthreadGetAllParamsSchema,
-    execute: async ({ pagination, filters }) => {
-      const response = await client.subthread.getAll({ pagination, filters });
-
-      return JSON.stringify(response);
+  server.tool(
+    'subthread_get_all',
+    "[PRIVATE] Get all team's subthreads.",
+    {
+      pagination: z.any().optional().describe('Pagination settings for querying threads'),
+      filters: z.any().optional().describe('Filter criteria to narrow down thread results'),
     },
-  });
+    async ({ pagination, filters }) => {
+      try {
+        const response = await BUU_SERVER_URL.request(getSubthreadsQuery, { pagination, filters });
+        const result = await processStreamingResponse(response);
+        return {
+          content: [{ type: 'text', text: result }],
+        };
+      } catch (error) {
+        console.error('Error calling subthread_get_all:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to retrieve subthreads. ${error}` }],
+        };
+      }
+    }
+  );
 };

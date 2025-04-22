@@ -1,4 +1,4 @@
-# Buu MCP Server
+# Buu AI MCP Server 
 
 ## Overview
 

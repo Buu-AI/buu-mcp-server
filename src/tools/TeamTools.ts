@@ -1,85 +1,374 @@
 import { z } from 'zod';
-import { FastMCP } from 'fastmcp';
-import { BuuFunServerClient } from 'buu-server-sdk';
-import {
-  TeamAddMemberParamsSchema,
-  TeamCreateParamsSchema,
-  TeamGetAllParamsSchema,
-  TeamRemoveMemberParamsSchema,
-  TeamUpdateMemberRoleParamsSchema,
-  TeamUpdateParamsSchema,
-} from '../types/Team';
+import { gql, GraphQLClient } from 'graphql-request';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { processStreamingResponse } from '../utils/shared.js';
 
-export const registerTeamTools = (server: FastMCP, createClient: () => BuuFunServerClient) => {
-  const client = createClient();
+const BUU_SERVER_URL = new GraphQLClient(
+  process.env.BUU_SERVER_URL || 'https://apollo-gateway-sandbox.up.railway.app/graphql'
+);
 
-  server.addTool({
-    name: 'team_create',
-    description: '[PRIVATE] Create a new team for the logged-in user.',
-    parameters: TeamCreateParamsSchema,
-    execute: async ({ name }) => {
-      const response = await client.team.create({ name });
-      return JSON.stringify(response);
+// Full Queries / Mutations with all fields
+
+const createTeamMutation = gql`
+  mutation CreateTeam($name: String!) {
+    createTeam(name: $name) {
+      ... on Team {
+        _id
+        type
+        name
+        creator
+        wallet
+        members {
+          address
+          role
+          status
+        }
+        available
+        pending
+        confirmed
+        updatedAt
+        createdAt
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
+
+const addTeamMemberMutation = gql`
+  mutation Mutation($member: String!) {
+    addTeamMember(member: $member) {
+      ... on Team {
+        _id
+        type
+        name
+        creator
+        wallet
+        members {
+          address
+          role
+          status
+        }
+        available
+        pending
+        confirmed
+        updatedAt
+        createdAt
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
+
+const removeTeamMemberMutation = gql`
+  mutation RemoveTeamMember($member: String!) {
+    removeTeamMember(member: $member) {
+      ... on Team {
+        _id
+        type
+        name
+        creator
+        wallet
+        members {
+          address
+          role
+          status
+        }
+        available
+        pending
+        confirmed
+        updatedAt
+        createdAt
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
+
+const updateTeamDataMutation = gql`
+  mutation UpdateTeamData($name: String, $wallet: String) {
+    updateTeamData(name: $name, wallet: $wallet) {
+      ... on Team {
+        _id
+        type
+        name
+        creator
+        wallet
+        members {
+          address
+          role
+          status
+        }
+        available
+        pending
+        confirmed
+        updatedAt
+        createdAt
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
+
+const updateTeamMemberRoleMutation = gql`
+  mutation UpdateTeamMemberRole($newRole: TeamRole!, $member: String!) {
+    updateTeamMemberRole(newRole: $newRole, member: $member) {
+      ... on Team {
+        _id
+        type
+        name
+        creator
+        wallet
+        members {
+          address
+          role
+          status
+        }
+        available
+        pending
+        confirmed
+        updatedAt
+        createdAt
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
+
+const getTeamQuery = gql`
+  query GetTeam {
+    getTeam {
+      ... on Team {
+        _id
+        type
+        name
+        creator
+        wallet
+        members {
+          address
+          role
+          status
+        }
+        available
+        pending
+        confirmed
+        updatedAt
+        createdAt
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
+
+const getUserTeamsQuery = gql`
+  query TeamPage($pagination: Pagination, $filters: TeamFilter) {
+    getUserTeams(pagination: $pagination, filters: $filters) {
+      ... on TeamPage {
+        items {
+          _id
+          type
+          name
+          creator
+          wallet
+          members {
+            address
+            role
+            status
+          }
+          available
+          pending
+          confirmed
+          updatedAt
+          createdAt
+        }
+        metadata {
+          limit
+          offset
+          orderBy
+          orderDirection
+          numElements
+          total
+          page
+          pages
+        }
+      }
+      ... on HandledError {
+        code
+        message
+      }
+    }
+  }
+`;
+
+export const registerTeamTools = (server: McpServer) => {
+  server.tool(
+    'team_create',
+    '[PRIVATE] Create a new team for the logged-in user.',
+    {
+      name: z.string().describe('The name of the new team'),
     },
-  });
+    async ({ name }) => {
+      try {
+        const response = await BUU_SERVER_URL.request(createTeamMutation, { name });
+        const result = await processStreamingResponse(response);
+        return { content: [{ type: 'text', text: result }] };
+      } catch (error) {
+        console.error('Error calling team_create:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to create team. ${error}` }],
+        };
+      }
+    }
+  );
 
-  server.addTool({
-    name: 'team_add_member',
-    description: '[PRIVATE] Add a new member to the team.',
-    parameters: TeamAddMemberParamsSchema,
-    execute: async ({ member }) => {
-      const response = await client.team.addMember({ member });
-      return JSON.stringify(response);
+  server.tool(
+    'team_add_member',
+    '[PRIVATE] Add a new member to the team.',
+    {
+      member: z.string().describe('Address of the new team member'),
     },
-  });
+    async ({ member }) => {
+      try {
+        const response = await BUU_SERVER_URL.request(addTeamMemberMutation, { member });
+        const result = await processStreamingResponse(response);
+        return { content: [{ type: 'text', text: result }] };
+      } catch (error) {
+        console.error('Error calling team_add_member:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to add team member. ${error}` }],
+        };
+      }
+    }
+  );
 
-  server.addTool({
-    name: 'team_remove_member',
-    description: '[PRIVATE] Remove a member from the team.',
-    parameters: TeamRemoveMemberParamsSchema,
-    execute: async ({ member }) => {
-      const response = await client.team.removeMember({ member });
-      return JSON.stringify(response);
+  server.tool(
+    'team_remove_member',
+    '[PRIVATE] Remove a member from the team.',
+    {
+      member: z.string().describe('Address of the team member to remove'),
     },
-  });
+    async ({ member }) => {
+      try {
+        const response = await BUU_SERVER_URL.request(removeTeamMemberMutation, { member });
+        const result = await processStreamingResponse(response);
+        return { content: [{ type: 'text', text: result }] };
+      } catch (error) {
+        console.error('Error calling team_remove_member:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to remove team member. ${error}` }],
+        };
+      }
+    }
+  );
 
-  server.addTool({
-    name: 'team_update',
-    description: '[PRIVATE] Update team data.',
-    parameters: TeamUpdateParamsSchema,
-    execute: async ({ name, wallet }) => {
-      const response = await client.team.update({ name, wallet });
-      return JSON.stringify(response);
+  server.tool(
+    'team_update',
+    '[PRIVATE] Update team data.',
+    {
+      name: z.string().optional().describe('New name for the team'),
+      wallet: z.string().optional().describe('New wallet address for the team'),
     },
-  });
+    async ({ name, wallet }) => {
+      try {
+        const response = await BUU_SERVER_URL.request(updateTeamDataMutation, { name, wallet });
+        const result = await processStreamingResponse(response);
+        return { content: [{ type: 'text', text: result }] };
+      } catch (error) {
+        console.error('Error calling team_update:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to update team. ${error}` }],
+        };
+      }
+    }
+  );
 
-  server.addTool({
-    name: 'team_update_member_role',
-    description: '[PRIVATE] Update the role of a team member.',
-    parameters: TeamUpdateMemberRoleParamsSchema,
-    execute: async ({ member, newRole }) => {
-      const response = await client.team.updateMemberRole({ member, newRole });
-      return JSON.stringify(response);
+  server.tool(
+    'team_update_member_role',
+    '[PRIVATE] Update the role of a team member.',
+    {
+      member: z.string().describe('Address of the team member'),
+      newRole: z.string().describe('New role for the team member'),
     },
-  });
+    async ({ member, newRole }) => {
+      try {
+        const response = await BUU_SERVER_URL.request(updateTeamMemberRoleMutation, {
+          member,
+          newRole,
+        });
+        const result = await processStreamingResponse(response);
+        return { content: [{ type: 'text', text: result }] };
+      } catch (error) {
+        console.error('Error calling team_update_member_role:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to update member role. ${error}` }],
+        };
+      }
+    }
+  );
 
-  server.addTool({
-    name: 'team_get',
-    description: '[PRIVATE] Get the personal team for the current user.',
-    parameters: z.object({}),
-    execute: async (_args) => {
-      const response = await client.team.get();
-      return JSON.stringify(response);
+  server.tool(
+    'team_get',
+    '[PRIVATE] Get the personal team for the current user.',
+    {
+      pagination: z.any().describe('Pagination settings'),
+      filters: z.any().describe('Pagination settings'),
     },
-  });
+    async () => {
+      try {
+        const response = await BUU_SERVER_URL.request(getTeamQuery);
+        const result = await processStreamingResponse(response);
+        return { content: [{ type: 'text', text: result }] };
+      } catch (error) {
+        console.error('Error calling team_get:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to retrieve team. ${error}` }],
+        };
+      }
+    }
+  );
 
-  server.addTool({
-    name: 'team_get_all',
-    description: '[PRIVATE] Get all teams for the current user.',
-    parameters: TeamGetAllParamsSchema,
-    execute: async ({ pagination, filters }) => {
-      const response = await client.team.getUserTeams({ pagination, filters });
-      return JSON.stringify(response);
+  server.tool(
+    'team_get_all',
+    '[PRIVATE] Get all teams for the current user.',
+    {
+      pagination: z.any().optional().describe('Pagination settings for querying threads'),
+      filters: z.any().optional().describe('Filter criteria to narrow down thread results'),
     },
-  });
+    async ({ pagination, filters }) => {
+      try {
+        const response = await BUU_SERVER_URL.request(getUserTeamsQuery, { pagination, filters });
+        const result = await processStreamingResponse(response);
+        return { content: [{ type: 'text', text: result }] };
+      } catch (error) {
+        console.error('Error calling team_get_all:', error);
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `Error: Failed to retrieve all teams. ${error}` }],
+        };
+      }
+    }
+  );
 };
