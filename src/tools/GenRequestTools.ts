@@ -1,11 +1,7 @@
 import { z } from 'zod';
-import { GraphQLClient, gql } from 'graphql-request';
+import { gql, GraphQLClient } from 'graphql-request';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { processStreamingResponse } from '../utils/shared.js';
-
-const BUU_SERVER_URL = new GraphQLClient(
-  process.env.BUU_SERVER_URL || 'https://apollo-gateway-sandbox.up.railway.app/graphql'
-);
 
 const generateImageQuery = gql`
   mutation GenerateImage($subthreadId: String!) {
@@ -139,7 +135,7 @@ const getSubthreadGenRequestsQuery = gql`
   }
 `;
 
-export const registerGenRequestTools = (server: McpServer) => {
+export const registerGenRequestTools = (server: McpServer, client: GraphQLClient) => {
   server.tool(
     'generate_image',
     '[PRIVATE] - Generate image',
@@ -148,7 +144,7 @@ export const registerGenRequestTools = (server: McpServer) => {
     },
     async ({ subthreadId }) => {
       try {
-        const response = await BUU_SERVER_URL.request(generateImageQuery, { subthreadId });
+        const response = await client.request(generateImageQuery, { subthreadId });
         const result = await processStreamingResponse(response);
         return {
           content: [
@@ -186,7 +182,7 @@ export const registerGenRequestTools = (server: McpServer) => {
     },
     async ({ imageRequestId, subthreadId, imageUrl }) => {
       try {
-        const response = await BUU_SERVER_URL.request(generateModelQuery, {
+        const response = await client.request(generateModelQuery, {
           imageUrl,
           subthreadId,
           imageRequestId,
@@ -223,7 +219,7 @@ export const registerGenRequestTools = (server: McpServer) => {
     },
     async ({ subthreadId }) => {
       try {
-        const response = await BUU_SERVER_URL.request(getSubthreadGenRequestsQuery, {
+        const response = await client.request(getSubthreadGenRequestsQuery, {
           subthreadId,
         });
         const result = await processStreamingResponse(response);

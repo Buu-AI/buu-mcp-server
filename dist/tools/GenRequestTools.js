@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import { GraphQLClient, gql } from 'graphql-request';
+import { gql } from 'graphql-request';
 import { processStreamingResponse } from '../utils/shared.js';
-const BUU_SERVER_URL = new GraphQLClient(process.env.BUU_SERVER_URL || "https://apollo-gateway-sandbox.up.railway.app/graphql");
 const generateImageQuery = gql `
   mutation GenerateImage($subthreadId: String!) {
     generateImage(subthreadId: $subthreadId) {
@@ -131,24 +130,24 @@ const getSubthreadGenRequestsQuery = gql `
     }
   }
 `;
-export const registerGenRequestTools = (server) => {
+export const registerGenRequestTools = (server, client) => {
     server.tool('generate_image', '[PRIVATE] - Generate image', {
         subthreadId: z.string().describe('Subthread ID used to generate the image'),
     }, async ({ subthreadId }) => {
         try {
-            const response = await BUU_SERVER_URL.request(generateImageQuery, { subthreadId });
+            const response = await client.request(generateImageQuery, { subthreadId });
             const result = await processStreamingResponse(response);
             return {
                 content: [
                     {
-                        type: "text",
+                        type: 'text',
                         text: result,
                     },
                 ],
             };
         }
         catch (error) {
-            console.error("Error calling generate_image:", error);
+            console.error('Error calling generate_image:', error);
             return {
                 isError: true,
                 content: [
@@ -169,19 +168,23 @@ export const registerGenRequestTools = (server) => {
         subthreadId: z.string().describe('Subthread ID where the model will be linked'),
     }, async ({ imageRequestId, subthreadId, imageUrl }) => {
         try {
-            const response = await BUU_SERVER_URL.request(generateModelQuery, { imageUrl, subthreadId, imageRequestId });
+            const response = await client.request(generateModelQuery, {
+                imageUrl,
+                subthreadId,
+                imageRequestId,
+            });
             const result = await processStreamingResponse(response);
             return {
                 content: [
                     {
-                        type: "text",
+                        type: 'text',
                         text: result,
                     },
                 ],
             };
         }
         catch (error) {
-            console.error("Error calling generate_model:", error);
+            console.error('Error calling generate_model:', error);
             return {
                 isError: true,
                 content: [
@@ -197,19 +200,21 @@ export const registerGenRequestTools = (server) => {
         subthreadId: z.string().describe('Subthread ID to retrieve all associated GenRequests'),
     }, async ({ subthreadId }) => {
         try {
-            const response = await BUU_SERVER_URL.request(getSubthreadGenRequestsQuery, { subthreadId });
+            const response = await client.request(getSubthreadGenRequestsQuery, {
+                subthreadId,
+            });
             const result = await processStreamingResponse(response);
             return {
                 content: [
                     {
-                        type: "text",
+                        type: 'text',
                         text: result,
                     },
                 ],
             };
         }
         catch (error) {
-            console.error("Error calling genrequest_get_all:", error);
+            console.error('Error calling genrequest_get_all:', error);
             return {
                 isError: true,
                 content: [

@@ -1,5 +1,5 @@
 async function processStreamingResponse(stream) {
-    let fullResponse = "";
+    let fullResponse = '';
     let citations = [];
     try {
         // Process the streaming response
@@ -8,19 +8,19 @@ async function processStreamingResponse(stream) {
             if (chunk.choices && chunk.choices[0]?.delta?.content) {
                 fullResponse += chunk.choices[0].delta.content;
                 // Check for citations in the final chunk
-                if (chunk.choices[0]?.finish_reason === "stop" && chunk.choices[0]?.citations) {
+                if (chunk.choices[0]?.finish_reason === 'stop' && chunk.choices[0]?.citations) {
                     citations = chunk.choices[0].citations;
                 }
             }
             // For Responses API
-            if (chunk.type === "response.output_text.delta") {
-                fullResponse += chunk.text?.delta || "";
+            if (chunk.type === 'response.output_text.delta') {
+                fullResponse += chunk.text?.delta || '';
             }
         }
         return fullResponse;
     }
     catch (error) {
-        console.error("Error processing streaming response:", error);
+        console.error('Error processing streaming response:', error);
         throw error;
     }
 }

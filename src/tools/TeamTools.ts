@@ -3,10 +3,6 @@ import { gql, GraphQLClient } from 'graphql-request';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { processStreamingResponse } from '../utils/shared.js';
 
-const BUU_SERVER_URL = new GraphQLClient(
-  process.env.BUU_SERVER_URL || 'https://apollo-gateway-sandbox.up.railway.app/graphql'
-);
-
 // Full Queries / Mutations with all fields
 
 const createTeamMutation = gql`
@@ -217,7 +213,7 @@ const getUserTeamsQuery = gql`
   }
 `;
 
-export const registerTeamTools = (server: McpServer) => {
+export const registerTeamTools = (server: McpServer, client: GraphQLClient) => {
   server.tool(
     'team_create',
     '[PRIVATE] Create a new team for the logged-in user.',
@@ -226,7 +222,7 @@ export const registerTeamTools = (server: McpServer) => {
     },
     async ({ name }) => {
       try {
-        const response = await BUU_SERVER_URL.request(createTeamMutation, { name });
+        const response = await client.request(createTeamMutation, { name });
         const result = await processStreamingResponse(response);
         return { content: [{ type: 'text', text: result }] };
       } catch (error) {
@@ -247,7 +243,7 @@ export const registerTeamTools = (server: McpServer) => {
     },
     async ({ member }) => {
       try {
-        const response = await BUU_SERVER_URL.request(addTeamMemberMutation, { member });
+        const response = await client.request(addTeamMemberMutation, { member });
         const result = await processStreamingResponse(response);
         return { content: [{ type: 'text', text: result }] };
       } catch (error) {
@@ -268,7 +264,7 @@ export const registerTeamTools = (server: McpServer) => {
     },
     async ({ member }) => {
       try {
-        const response = await BUU_SERVER_URL.request(removeTeamMemberMutation, { member });
+        const response = await client.request(removeTeamMemberMutation, { member });
         const result = await processStreamingResponse(response);
         return { content: [{ type: 'text', text: result }] };
       } catch (error) {
@@ -290,7 +286,7 @@ export const registerTeamTools = (server: McpServer) => {
     },
     async ({ name, wallet }) => {
       try {
-        const response = await BUU_SERVER_URL.request(updateTeamDataMutation, { name, wallet });
+        const response = await client.request(updateTeamDataMutation, { name, wallet });
         const result = await processStreamingResponse(response);
         return { content: [{ type: 'text', text: result }] };
       } catch (error) {
@@ -312,7 +308,7 @@ export const registerTeamTools = (server: McpServer) => {
     },
     async ({ member, newRole }) => {
       try {
-        const response = await BUU_SERVER_URL.request(updateTeamMemberRoleMutation, {
+        const response = await client.request(updateTeamMemberRoleMutation, {
           member,
           newRole,
         });
@@ -337,7 +333,7 @@ export const registerTeamTools = (server: McpServer) => {
     },
     async () => {
       try {
-        const response = await BUU_SERVER_URL.request(getTeamQuery);
+        const response = await client.request(getTeamQuery);
         const result = await processStreamingResponse(response);
         return { content: [{ type: 'text', text: result }] };
       } catch (error) {
@@ -359,7 +355,7 @@ export const registerTeamTools = (server: McpServer) => {
     },
     async ({ pagination, filters }) => {
       try {
-        const response = await BUU_SERVER_URL.request(getUserTeamsQuery, { pagination, filters });
+        const response = await client.request(getUserTeamsQuery, { pagination, filters });
         const result = await processStreamingResponse(response);
         return { content: [{ type: 'text', text: result }] };
       } catch (error) {

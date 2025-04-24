@@ -3,10 +3,6 @@ import { gql, GraphQLClient } from 'graphql-request';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { processStreamingResponse } from '../utils/shared.js';
 
-const BUU_SERVER_URL = new GraphQLClient(
-  process.env.BUU_SERVER_URL || 'https://apollo-gateway-sandbox.up.railway.app/graphql'
-);
-
 const generateSubthreadMutation = gql`
   mutation GenerateSubthread(
     $style: JSON
@@ -100,7 +96,7 @@ const getSubthreadsQuery = gql`
   }
 `;
 
-export const registerSubthreadTools = (server: McpServer) => {
+export const registerSubthreadTools = (server: McpServer, client: GraphQLClient) => {
   server.tool(
     'subthread_generate',
     '[PRIVATE] Generates a new subthread.',
@@ -113,7 +109,7 @@ export const registerSubthreadTools = (server: McpServer) => {
     },
     async ({ style, prompt, imageUrl, strength, threadId }) => {
       try {
-        const response = await BUU_SERVER_URL.request(generateSubthreadMutation, {
+        const response = await client.request(generateSubthreadMutation, {
           style,
           prompt,
           imageUrl,
@@ -142,7 +138,7 @@ export const registerSubthreadTools = (server: McpServer) => {
     },
     async ({ subthreadId }) => {
       try {
-        const response = await BUU_SERVER_URL.request(getSubthreadQuery, { subthreadId });
+        const response = await client.request(getSubthreadQuery, { subthreadId });
         const result = await processStreamingResponse(response);
         return {
           content: [{ type: 'text', text: result }],
@@ -166,7 +162,7 @@ export const registerSubthreadTools = (server: McpServer) => {
     },
     async ({ pagination, filters }) => {
       try {
-        const response = await BUU_SERVER_URL.request(getSubthreadsQuery, { pagination, filters });
+        const response = await client.request(getSubthreadsQuery, { pagination, filters });
         const result = await processStreamingResponse(response);
         return {
           content: [{ type: 'text', text: result }],
