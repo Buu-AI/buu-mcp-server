@@ -145,15 +145,7 @@ export const registerGenRequestTools = (server: McpServer, client: GraphQLClient
     async ({ subthreadId }) => {
       try {
         const response = await client.request(generateImageQuery, { subthreadId });
-        const result = await processStreamingResponse(response);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: result,
-            },
-          ],
-        };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling generate_image:', error);
         return {
@@ -187,15 +179,7 @@ export const registerGenRequestTools = (server: McpServer, client: GraphQLClient
           subthreadId,
           imageRequestId,
         });
-        const result = await processStreamingResponse(response);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: result,
-            },
-          ],
-        };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling generate_model:', error);
         return {
@@ -222,15 +206,7 @@ export const registerGenRequestTools = (server: McpServer, client: GraphQLClient
         const response = await client.request(getSubthreadGenRequestsQuery, {
           subthreadId,
         });
-        const result = await processStreamingResponse(response);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: result,
-            },
-          ],
-        };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling genrequest_get_all:', error);
         return {

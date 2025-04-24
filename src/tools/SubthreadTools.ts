@@ -85,20 +85,20 @@ const getSubthreadsQuery = gql`
 `;
 
 export enum SubthreadStyle {
-  Realistic = 'realistic',
-  LowPoly = 'lowPoly',
-  Voxel = 'voxel',
-  Stylized = 'stylized',
-  Toon = 'toon',
-  SciFi = 'sciFi',
-  Fantasy = 'fantasy',
-  Wireframe = 'wireframe',
-  Clay = 'clay',
-  Metallic = 'metallic',
-  Cute = 'cute',
-  Isometric = 'isometric',
-  Weapons = 'weapons',
-  Environment = 'environment',
+  'Realistic',
+  'LowPoly',
+  'Voxel',
+  'Stylized',
+  'Toon',
+  'SciFi',
+  'Fantasy',
+  'Wireframe',
+  'Clay',
+  'Metallic',
+  'Cute',
+  'Isometric',
+  'Weapons',
+  'Environment',
 }
 
 export const registerSubthreadTools = (server: McpServer, client: GraphQLClient) => {
@@ -118,10 +118,7 @@ export const registerSubthreadTools = (server: McpServer, client: GraphQLClient)
           style,
           prompt,
         });
-        const result = await processStreamingResponse(response);
-        return {
-          content: [{ type: 'text', text: result }],
-        };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling subthread_generate:', error);
         return {
@@ -141,10 +138,7 @@ export const registerSubthreadTools = (server: McpServer, client: GraphQLClient)
     async ({ subthreadId }) => {
       try {
         const response = await client.request(getSubthreadQuery, { subthreadId });
-        const result = await processStreamingResponse(response);
-        return {
-          content: [{ type: 'text', text: result }],
-        };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling subthread_get:', error);
         return {
@@ -165,10 +159,7 @@ export const registerSubthreadTools = (server: McpServer, client: GraphQLClient)
     async ({ pagination, filters }) => {
       try {
         const response = await client.request(getSubthreadsQuery, { pagination, filters });
-        const result = await processStreamingResponse(response);
-        return {
-          content: [{ type: 'text', text: result }],
-        };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling subthread_get_all:', error);
         return {

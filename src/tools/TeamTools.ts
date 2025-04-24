@@ -223,8 +223,7 @@ export const registerTeamTools = (server: McpServer, client: GraphQLClient) => {
     async ({ name }) => {
       try {
         const response = await client.request(createTeamMutation, { name });
-        const result = await processStreamingResponse(response);
-        return { content: [{ type: 'text', text: result }] };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling team_create:', error);
         return {
@@ -244,8 +243,7 @@ export const registerTeamTools = (server: McpServer, client: GraphQLClient) => {
     async ({ member }) => {
       try {
         const response = await client.request(addTeamMemberMutation, { member });
-        const result = await processStreamingResponse(response);
-        return { content: [{ type: 'text', text: result }] };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling team_add_member:', error);
         return {
@@ -265,8 +263,7 @@ export const registerTeamTools = (server: McpServer, client: GraphQLClient) => {
     async ({ member }) => {
       try {
         const response = await client.request(removeTeamMemberMutation, { member });
-        const result = await processStreamingResponse(response);
-        return { content: [{ type: 'text', text: result }] };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling team_remove_member:', error);
         return {
@@ -287,8 +284,7 @@ export const registerTeamTools = (server: McpServer, client: GraphQLClient) => {
     async ({ name, wallet }) => {
       try {
         const response = await client.request(updateTeamDataMutation, { name, wallet });
-        const result = await processStreamingResponse(response);
-        return { content: [{ type: 'text', text: result }] };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling team_update:', error);
         return {
@@ -312,8 +308,7 @@ export const registerTeamTools = (server: McpServer, client: GraphQLClient) => {
           member,
           newRole,
         });
-        const result = await processStreamingResponse(response);
-        return { content: [{ type: 'text', text: result }] };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling team_update_member_role:', error);
         return {
@@ -327,8 +322,7 @@ export const registerTeamTools = (server: McpServer, client: GraphQLClient) => {
   server.tool('team_get', '[PRIVATE] Get the personal team for the current user.', {}, async () => {
     try {
       const response = await client.request(getTeamQuery);
-      const result = await processStreamingResponse(response);
-      return { content: [{ type: 'text', text: result }] };
+      return { content: [{ type: 'text', text: JSON.stringify(response) }] };
     } catch (error) {
       console.error('Error calling team_get:', error);
       return {
@@ -348,8 +342,7 @@ export const registerTeamTools = (server: McpServer, client: GraphQLClient) => {
     async ({ pagination, filters }) => {
       try {
         const response = await client.request(getUserTeamsQuery, { pagination, filters });
-        const result = await processStreamingResponse(response);
-        return { content: [{ type: 'text', text: result }] };
+        return { content: [{ type: 'text', text: JSON.stringify(response) }] };
       } catch (error) {
         console.error('Error calling team_get_all:', error);
         return {
