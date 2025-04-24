@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 build
+dist
 .env
 dist*# Logs
 logs
