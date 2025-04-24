@@ -324,27 +324,19 @@ export const registerTeamTools = (server: McpServer, client: GraphQLClient) => {
     }
   );
 
-  server.tool(
-    'team_get',
-    '[PRIVATE] Get the personal team for the current user.',
-    {
-      pagination: z.any().describe('Pagination settings'),
-      filters: z.any().describe('Pagination settings'),
-    },
-    async () => {
-      try {
-        const response = await client.request(getTeamQuery);
-        const result = await processStreamingResponse(response);
-        return { content: [{ type: 'text', text: result }] };
-      } catch (error) {
-        console.error('Error calling team_get:', error);
-        return {
-          isError: true,
-          content: [{ type: 'text', text: `Error: Failed to retrieve team. ${error}` }],
-        };
-      }
+  server.tool('team_get', '[PRIVATE] Get the personal team for the current user.', {}, async () => {
+    try {
+      const response = await client.request(getTeamQuery);
+      const result = await processStreamingResponse(response);
+      return { content: [{ type: 'text', text: result }] };
+    } catch (error) {
+      console.error('Error calling team_get:', error);
+      return {
+        isError: true,
+        content: [{ type: 'text', text: `Error: Failed to retrieve team. ${error}` }],
+      };
     }
-  );
+  });
 
   server.tool(
     'team_get_all',

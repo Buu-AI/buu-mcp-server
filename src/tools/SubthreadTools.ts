@@ -4,20 +4,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { processStreamingResponse } from '../utils/shared.js';
 
 const generateSubthreadMutation = gql`
-  mutation GenerateSubthread(
-    $style: JSON
-    $prompt: String
-    $imageUrl: String
-    $strength: Float
-    $threadId: String
-  ) {
-    generateSubthread(
-      style: $style
-      prompt: $prompt
-      imageUrl: $imageUrl
-      strength: $strength
-      threadId: $threadId
-    ) {
+  mutation GenerateSubthread($style: JSON, $prompt: String) {
+    generateSubthread(style: $style, prompt: $prompt) {
       ... on Subthread {
         _id
         createdAt
@@ -96,25 +84,39 @@ const getSubthreadsQuery = gql`
   }
 `;
 
+export enum SubthreadStyle {
+  Realistic = 'realistic',
+  LowPoly = 'lowPoly',
+  Voxel = 'voxel',
+  Stylized = 'stylized',
+  Toon = 'toon',
+  SciFi = 'sciFi',
+  Fantasy = 'fantasy',
+  Wireframe = 'wireframe',
+  Clay = 'clay',
+  Metallic = 'metallic',
+  Cute = 'cute',
+  Isometric = 'isometric',
+  Weapons = 'weapons',
+  Environment = 'environment',
+}
+
 export const registerSubthreadTools = (server: McpServer, client: GraphQLClient) => {
   server.tool(
     'subthread_generate',
     '[PRIVATE] Generates a new subthread.',
     {
-      style: z.any().optional().describe('Optional style input for subthread generation'),
+      style: z
+        .nativeEnum(SubthreadStyle)
+        .optional()
+        .describe('Optional style input for subthread generation'),
       prompt: z.string().optional().describe('Optional prompt text'),
-      imageUrl: z.string().optional().describe('Optional URL of the image'),
-      strength: z.number().optional().describe('Optional strength value for image influence'),
-      threadId: z.string().optional().describe('Optional thread ID'),
     },
-    async ({ style, prompt, imageUrl, strength, threadId }) => {
+    async ({ style, prompt }) => {
       try {
         const response = await client.request(generateSubthreadMutation, {
           style,
           prompt,
-          imageUrl,
-          strength,
-          threadId,
         });
         const result = await processStreamingResponse(response);
         return {
