@@ -3,14 +3,18 @@ startCommand:
   configSchema:
     type: object
     required:
+      - buuServerUrl 
       - buuTeamApiKey
     properties:
       buuTeamApiKey:
         type: string
         description: Your Buu Team API key
+      buuServerUrl:
+        type: string
+        description: Buu AI server endpoint
   commandFunction: |
     (config) => ({
       command: 'node',
       args: ['dist/index.js'],
-      env: { BUU_TEAM_API_KEY: config.buuTeamApiKey }
+      env: { BUU_TEAM_API_KEY: config.buuTeamApiKey, BUU_SERVER_URL: config.buuServerUrl }
     }) 
