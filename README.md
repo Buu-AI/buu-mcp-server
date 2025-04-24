@@ -2,38 +2,45 @@
 
 ## Overview
 
-This server acts as a command execution gateway for the Buu platform, exposing tools to manage teams, threads, subthreads, and generation requests using a standardized MCP interface.
+This server acts as a command execution gateway for the Buu platform, exposing tools to manage teams, subthreads, and generation requests using a standardized MCP interface.
 
 ---
 
 ## Features
 
 - Connects to the Buu GraphQL server
-- Supports team and thread operations
+- Supports Team, Subthread and GenRequest operations
 - Enables generation request handling
-- Authenticates with API key or session token
+- Authenticates with API key
 - Communicates via `stdio` transport (ideal for CLI or tool embedding)
 
 ---
 
-## Environment Variables
+## Client Installation Instructions
+
+#### Running on Claude Desktop
+
+To configure Octagon MCP for Claude Desktop:
 
 ```bash
-BUU_SERVER_URL=https://your-buu-server/graphql
-TEAM_API_KEY=your-api-key
+npx -y @smithery/cli@latest install @OctagonAI/octagon-mcp-server --client claude
 ```
 
 ---
 
-## Running the Server
+## Configuration
 
-```bash
-node dist/index.js
-```
+### Environment Variables
 
-> The server starts using the `stdio` transport. It listens for commands and responds in MCP protocol format.
+#### Required
 
----
+- `BUU_TEAM_API_KEY`: Your Buu AI team API key
+  - Required for all operations
+
+#### Optional
+
+- `BUU_SERVER_URL`: Buu API URL
+  - By default uses the sandbox environment
 
 ## Tool Registration
 
@@ -47,10 +54,6 @@ node dist/index.js
 - `team_get` — Get the personal team for the current user
 - `team_get_all` — Get all teams for the current user
 
-### 2. ThreadTools
-
-- `threads_get_all` — Get all user's threads
-
 ### 3. SubthreadTools
 
 - `subthread_generate` — Generate a subthread for a Thread
@@ -62,41 +65,3 @@ node dist/index.js
 - `generate_image` — Generate image for a subthread 
 - `generate_model` — Generate 3D model for subthread 
 - `genrequest_get_all` — Get all GenRequests for a specific subthread
-
----
-
-## Authentication
-
-The server uses either:
-
-- A `TEAM_API_KEY` from env to log in
-
----
-
-## Claude Integration (MCP Inspector)
-
-To configure this MCP server for use in Claude:
-
-```json
-{
-  "mcpServers": {
-    "buu-server": {
-      "command": "node",
-      "args": ["dist/index.js"],
-      "transport": "stdio",
-      "env": {
-        "BUU_SERVER_URL": "https://your-buu-server/graphql",
-        "TEAM_API_KEY": "your-api-key"
-      }
-    }
-  }
-}
-```
-
-> You can add this configuration to your Claude MCP Inspector under **Settings > MCP Servers**.
-
----
-
-## License
-
-MIT
