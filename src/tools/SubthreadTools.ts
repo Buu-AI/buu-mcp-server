@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { gql, GraphQLClient } from 'graphql-request';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { processStreamingResponse } from '../utils/shared.js';
 
 const generateSubthreadMutation = gql`
   mutation GenerateSubthread($style: JSON, $prompt: String) {

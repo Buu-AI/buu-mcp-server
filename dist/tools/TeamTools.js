@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { gql } from 'graphql-request';
-import { processStreamingResponse } from '../utils/shared.js';
 // Full Queries / Mutations with all fields
 const createTeamMutation = gql `
   mutation CreateTeam($name: String!) {
@@ -209,8 +208,7 @@ export const registerTeamTools = (server, client) => {
     }, async ({ name }) => {
         try {
             const response = await client.request(createTeamMutation, { name });
-            const result = await processStreamingResponse(response);
-            return { content: [{ type: 'text', text: result }] };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling team_create:', error);
@@ -225,8 +223,7 @@ export const registerTeamTools = (server, client) => {
     }, async ({ member }) => {
         try {
             const response = await client.request(addTeamMemberMutation, { member });
-            const result = await processStreamingResponse(response);
-            return { content: [{ type: 'text', text: result }] };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling team_add_member:', error);
@@ -241,8 +238,7 @@ export const registerTeamTools = (server, client) => {
     }, async ({ member }) => {
         try {
             const response = await client.request(removeTeamMemberMutation, { member });
-            const result = await processStreamingResponse(response);
-            return { content: [{ type: 'text', text: result }] };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling team_remove_member:', error);
@@ -258,8 +254,7 @@ export const registerTeamTools = (server, client) => {
     }, async ({ name, wallet }) => {
         try {
             const response = await client.request(updateTeamDataMutation, { name, wallet });
-            const result = await processStreamingResponse(response);
-            return { content: [{ type: 'text', text: result }] };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling team_update:', error);
@@ -278,8 +273,7 @@ export const registerTeamTools = (server, client) => {
                 member,
                 newRole,
             });
-            const result = await processStreamingResponse(response);
-            return { content: [{ type: 'text', text: result }] };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling team_update_member_role:', error);
@@ -289,14 +283,10 @@ export const registerTeamTools = (server, client) => {
             };
         }
     });
-    server.tool('team_get', '[PRIVATE] Get the personal team for the current user.', {
-        pagination: z.any().describe('Pagination settings'),
-        filters: z.any().describe('Pagination settings'),
-    }, async () => {
+    server.tool('team_get', '[PRIVATE] Get the personal team for the current user.', {}, async () => {
         try {
             const response = await client.request(getTeamQuery);
-            const result = await processStreamingResponse(response);
-            return { content: [{ type: 'text', text: result }] };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling team_get:', error);
@@ -312,8 +302,7 @@ export const registerTeamTools = (server, client) => {
     }, async ({ pagination, filters }) => {
         try {
             const response = await client.request(getUserTeamsQuery, { pagination, filters });
-            const result = await processStreamingResponse(response);
-            return { content: [{ type: 'text', text: result }] };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling team_get_all:', error);

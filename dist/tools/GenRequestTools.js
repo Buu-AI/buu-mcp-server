@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { gql } from 'graphql-request';
-import { processStreamingResponse } from '../utils/shared.js';
 const generateImageQuery = gql `
   mutation GenerateImage($subthreadId: String!) {
     generateImage(subthreadId: $subthreadId) {
@@ -136,15 +135,7 @@ export const registerGenRequestTools = (server, client) => {
     }, async ({ subthreadId }) => {
         try {
             const response = await client.request(generateImageQuery, { subthreadId });
-            const result = await processStreamingResponse(response);
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: result,
-                    },
-                ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling generate_image:', error);
@@ -173,15 +164,7 @@ export const registerGenRequestTools = (server, client) => {
                 subthreadId,
                 imageRequestId,
             });
-            const result = await processStreamingResponse(response);
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: result,
-                    },
-                ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling generate_model:', error);
@@ -203,15 +186,7 @@ export const registerGenRequestTools = (server, client) => {
             const response = await client.request(getSubthreadGenRequestsQuery, {
                 subthreadId,
             });
-            const result = await processStreamingResponse(response);
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: result,
-                    },
-                ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling genrequest_get_all:', error);

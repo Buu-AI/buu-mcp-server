@@ -1,21 +1,8 @@
 import { z } from 'zod';
 import { gql } from 'graphql-request';
-import { processStreamingResponse } from '../utils/shared.js';
 const generateSubthreadMutation = gql `
-  mutation GenerateSubthread(
-    $style: JSON
-    $prompt: String
-    $imageUrl: String
-    $strength: Float
-    $threadId: String
-  ) {
-    generateSubthread(
-      style: $style
-      prompt: $prompt
-      imageUrl: $imageUrl
-      strength: $strength
-      threadId: $threadId
-    ) {
+  mutation GenerateSubthread($style: JSON, $prompt: String) {
+    generateSubthread(style: $style, prompt: $prompt) {
       ... on Subthread {
         _id
         createdAt
@@ -91,26 +78,37 @@ const getSubthreadsQuery = gql `
     }
   }
 `;
+export var SubthreadStyle;
+(function (SubthreadStyle) {
+    SubthreadStyle[SubthreadStyle["Realistic"] = 0] = "Realistic";
+    SubthreadStyle[SubthreadStyle["LowPoly"] = 1] = "LowPoly";
+    SubthreadStyle[SubthreadStyle["Voxel"] = 2] = "Voxel";
+    SubthreadStyle[SubthreadStyle["Stylized"] = 3] = "Stylized";
+    SubthreadStyle[SubthreadStyle["Toon"] = 4] = "Toon";
+    SubthreadStyle[SubthreadStyle["SciFi"] = 5] = "SciFi";
+    SubthreadStyle[SubthreadStyle["Fantasy"] = 6] = "Fantasy";
+    SubthreadStyle[SubthreadStyle["Wireframe"] = 7] = "Wireframe";
+    SubthreadStyle[SubthreadStyle["Clay"] = 8] = "Clay";
+    SubthreadStyle[SubthreadStyle["Metallic"] = 9] = "Metallic";
+    SubthreadStyle[SubthreadStyle["Cute"] = 10] = "Cute";
+    SubthreadStyle[SubthreadStyle["Isometric"] = 11] = "Isometric";
+    SubthreadStyle[SubthreadStyle["Weapons"] = 12] = "Weapons";
+    SubthreadStyle[SubthreadStyle["Environment"] = 13] = "Environment";
+})(SubthreadStyle || (SubthreadStyle = {}));
 export const registerSubthreadTools = (server, client) => {
     server.tool('subthread_generate', '[PRIVATE] Generates a new subthread.', {
-        style: z.any().optional().describe('Optional style input for subthread generation'),
+        style: z
+            .nativeEnum(SubthreadStyle)
+            .optional()
+            .describe('Optional style input for subthread generation'),
         prompt: z.string().optional().describe('Optional prompt text'),
-        imageUrl: z.string().optional().describe('Optional URL of the image'),
-        strength: z.number().optional().describe('Optional strength value for image influence'),
-        threadId: z.string().optional().describe('Optional thread ID'),
-    }, async ({ style, prompt, imageUrl, strength, threadId }) => {
+    }, async ({ style, prompt }) => {
         try {
             const response = await client.request(generateSubthreadMutation, {
                 style,
                 prompt,
-                imageUrl,
-                strength,
-                threadId,
             });
-            const result = await processStreamingResponse(response);
-            return {
-                content: [{ type: 'text', text: result }],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling subthread_generate:', error);
@@ -125,10 +123,7 @@ export const registerSubthreadTools = (server, client) => {
     }, async ({ subthreadId }) => {
         try {
             const response = await client.request(getSubthreadQuery, { subthreadId });
-            const result = await processStreamingResponse(response);
-            return {
-                content: [{ type: 'text', text: result }],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling subthread_get:', error);
@@ -144,10 +139,7 @@ export const registerSubthreadTools = (server, client) => {
     }, async ({ pagination, filters }) => {
         try {
             const response = await client.request(getSubthreadsQuery, { pagination, filters });
-            const result = await processStreamingResponse(response);
-            return {
-                content: [{ type: 'text', text: result }],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(response) }] };
         }
         catch (error) {
             console.error('Error calling subthread_get_all:', error);
