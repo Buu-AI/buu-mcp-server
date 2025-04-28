@@ -65,3 +65,7 @@ npx -y @smithery/cli@latest install @OctagonAI/octagon-mcp-server --client claud
 - `generate_image` — Generate image for a subthread 
 - `generate_model` — Generate 3D model for subthread 
 - `genrequest_get_all` — Get all GenRequests for a specific subthread
+
+<a href="https://glama.ai/mcp/servers/@Buu-AI/buu-mcp-server">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@Buu-AI/buu-mcp-server/badge" />
+</a>
