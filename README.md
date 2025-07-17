@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/buu-ai-buu-mcp-server-badge.png)](https://mseep.ai/app/buu-ai-buu-mcp-server)
+
 # Buu AI MCP Server 
 
 ## Overview
